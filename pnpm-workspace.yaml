@@ -10,3 +10,6 @@ minimumReleaseAgeExclude:
   - '@typescript-eslint/utils@8.71.2'
   - '@typescript-eslint/visitor-keys@8.71.2'
   - typescript-eslint@8.71.2
+  - '@vitest/mocker@5.0.4'
+  - '@vitest/spy@5.0.4'
+  - vitest@5.0.4
