@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
+import { ChatApiError, sendChat } from "./api/chat"
 import { Composer } from "./components/Composer"
 import { Header } from "./components/Header"
 import { MessageList } from "./components/MessageList"
@@ -10,7 +11,13 @@ export default function App() {
   const [message, setMessage] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
 
-  const sendMessage = (event: FormEvent) => {
+  const currentTime = () =>
+    new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+
+  const sendMessage = async (event: FormEvent) => {
     event.preventDefault()
     const body = message.trim()
     if (!body) return
@@ -21,13 +28,35 @@ export default function App() {
         id: Date.now(),
         body,
         role: "user",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        time: currentTime(),
       },
     ])
     setMessage("")
+
+    try {
+      const response = await sendChat({ prompt: body, provider: activeModel })
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now(),
+          body: response.summary,
+          role: "assistant",
+          time: currentTime(),
+        },
+      ])
+    } catch (error) {
+      const body =
+        error instanceof ChatApiError && error.message ? error.message : "Something went wrong"
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now(),
+          body,
+          role: "error",
+          time: currentTime(),
+        },
+      ])
+    }
   }
 
   return (

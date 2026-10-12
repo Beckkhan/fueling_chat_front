@@ -2,6 +2,13 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import App from "./App"
 
+const okResponse = (body: unknown) =>
+  ({
+    ok: true,
+    status: 200,
+    json: async () => body,
+  }) as Response
+
 describe("App", () => {
   it("renders the header per the mockup", () => {
     render(<App />)
@@ -59,6 +66,12 @@ describe("App", () => {
   })
 
   it("sends on Enter, appends an optimistic user bubble and scrolls to it", () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(okResponse({ summary: "Summary", provider: "local", elapsed_ms: 5 })),
+    )
     const scrollSpy = vi.spyOn(Element.prototype, "scrollIntoView")
     render(<App />)
 
@@ -71,6 +84,7 @@ describe("App", () => {
     expect(screen.getByLabelText("Send message")).toBeDisabled()
     expect(scrollSpy).toHaveBeenCalled()
     scrollSpy.mockRestore()
+    vi.unstubAllGlobals()
   })
 
   it("inserts a newline on Shift+Enter instead of sending", () => {

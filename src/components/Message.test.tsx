@@ -25,4 +25,16 @@ describe("Message", () => {
     expect(screen.getByText("10:17")).toBeInTheDocument()
     expect(bubble.closest("article")).not.toHaveClass("flex-row-reverse")
   })
+
+  it("renders an error bubble left-aligned muted", () => {
+    render(
+      <Message message={{ id: 3, body: "Databases unavailable", role: "error", time: "10:18" }} />,
+    )
+
+    const bubble = screen.getByText("Databases unavailable")
+    expect(bubble.className).toContain("bg-[#f4f2ed]")
+    expect(bubble.className).toContain("text-[#929996]")
+    expect(screen.getByText("!")).toBeInTheDocument()
+    expect(bubble.closest("article")).not.toHaveClass("flex-row-reverse")
+  })
 })
