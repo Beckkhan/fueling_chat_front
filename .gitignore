@@ -1,2 +1,10 @@
 # Secrets
 .env
+
+# Build outputs
+node_modules/
+dist/
+
+# OS / IDE
+.DS_Store
+.idea/
