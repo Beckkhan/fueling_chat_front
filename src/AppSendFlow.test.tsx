@@ -101,4 +101,16 @@ describe("send flow", () => {
     expect(bubble.className).toContain("text-[#929996]")
     await waitFor(() => expect(screen.getByLabelText("Message")).toHaveValue(""))
   })
+
+  it("renders a generic message in a muted bubble when the request fails without a server body", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")))
+    render(<App />)
+
+    await send("Hello")
+
+    const bubble = await screen.findByText("Something went wrong")
+    expect(bubble.className).toContain("bg-[#f4f2ed]")
+    expect(bubble.className).toContain("text-[#929996]")
+    expect(screen.queryByText("Failed to fetch")).not.toBeInTheDocument()
+  })
 })
