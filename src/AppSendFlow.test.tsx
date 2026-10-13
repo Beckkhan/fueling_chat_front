@@ -101,4 +101,17 @@ describe("send flow", () => {
     expect(bubble.className).toContain("text-[#929996]")
     await waitFor(() => expect(screen.getByLabelText("Message")).toHaveValue(""))
   })
+
+  it("renders the generic network-failure message in the muted bubble when fetch rejects", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")))
+    render(<App />)
+
+    await send("Hello")
+
+    // Not a ChatApiError → the generic message (CONTRACT-UI-002), still muted.
+    const bubble = await screen.findByText("Something went wrong")
+    expect(bubble.className).toContain("bg-[#f4f2ed]")
+    expect(bubble.className).toContain("text-[#929996]")
+    await waitFor(() => expect(screen.getByLabelText("Message")).toHaveValue(""))
+  })
 })

@@ -34,6 +34,12 @@ export default function App() {
     setMessage("")
 
     try {
+      // CONTRACT-API-001: send exactly {prompt, provider} — activeModel
+      // defaults to "local" (D-10) and follows the switcher. A pinned
+      // `fueling_id` (D-9: an explicit field, never extracted from the prompt)
+      // is added by the client when the request carries one; the mockup (G-1)
+      // defines no pin control yet, so that path lives in api/chat.test.ts
+      // until the UI exists — no App state for it.
       const response = await sendChat({ prompt: body, provider: activeModel })
       setMessages((current) => [
         ...current,
@@ -45,6 +51,12 @@ export default function App() {
         },
       ])
     } catch (error) {
+      // CONTRACT-UI-002: ChatApiError.message is already masked by api/chat.ts
+      // (JSON error body, or the status fallback `request failed with status <n>`
+      // for non-JSON bodies) — render it verbatim. Any other rejection (network
+      // failure, e.g. fetch rejecting with TypeError) renders the generic
+      // "Something went wrong". Both branches keep the muted bubble: role "error"
+      // renders bg-[#f4f2ed] / text-[#929996] in Message.tsx — no markup changes here.
       const body =
         error instanceof ChatApiError && error.message ? error.message : "Something went wrong"
       setMessages((current) => [
