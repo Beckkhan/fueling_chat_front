@@ -58,7 +58,10 @@ describe("sendChat", () => {
   })
 
   it("maps a non-200 JSON body to a ChatApiError with the masked error message", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ error: "Bad request" }, false, 400)))
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse({ error: "Bad request" }, false, 400)),
+    )
 
     const promise = sendChat({ prompt: "Hello", provider: "local" })
     await expect(promise).rejects.toBeInstanceOf(ChatApiError)
@@ -82,7 +85,10 @@ describe("sendChat", () => {
   })
 
   it("falls back to the masked status text when the JSON error body has no error field", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ detail: "hidden" }, false, 500)))
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonResponse({ detail: "hidden" }, false, 500)),
+    )
 
     const promise = sendChat({ prompt: "Hello", provider: "local" })
     await expect(promise).rejects.toBeInstanceOf(ChatApiError)
