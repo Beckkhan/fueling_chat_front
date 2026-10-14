@@ -14,6 +14,7 @@ const errorResponse = (status: number, error: string) =>
     ok: false,
     status,
     json: async () => ({ error }),
+    text: async () => JSON.stringify({ error }),
   }) as Response
 
 async function send(text: string) {
