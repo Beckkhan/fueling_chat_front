@@ -11,8 +11,14 @@ export async function sendChat(request: ChatRequest): Promise<ChatResponse> {
     body: JSON.stringify(request),
   })
   if (!response.ok) {
-    const body = (await response.json()) as { error?: string }
-    throw new ChatApiError(body.error ?? `request failed with status ${response.status}`)
+    const fallback = `request failed with status ${response.status}`
+    let body: { error?: string } | null = null
+    try {
+      body = (await response.json()) as { error?: string } | null
+    } catch {
+      throw new ChatApiError(fallback)
+    }
+    throw new ChatApiError(body?.error ?? fallback)
   }
   return (await response.json()) as ChatResponse
 }
