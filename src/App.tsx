@@ -6,59 +6,30 @@ import { Header } from "./components/Header"
 import { MessageList } from "./components/MessageList"
 import type { Message, ModelId } from "./types"
 
-export default function App() {
-  const [activeModel, setActiveModel] = useState<ModelId>("local")
-  const [message, setMessage] = useState("")
-  const [messages, setMessages] = useState<Message[]>([])
+const currentTime = () =>
+  new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 
-  const currentTime = () =>
-    new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+const errorMessage = (error: unknown) =>
+  error instanceof ChatApiError && error.message ? error.message : "Something went wrong"
 
-  const sendMessage = async (event: FormEvent) => {
-    event.preventDefault()
-    const body = message.trim()
-    if (!body) return
-
-    setMessages((current) => [
-      ...current,
-      {
-        id: Date.now(),
-        body,
-        role: "user",
-        time: currentTime(),
-      },
-    ])
-    setMessage("")
-
-    try {
-      const response = await sendChat({ prompt: body, provider: activeModel })
-      setMessages((current) => [
-        ...current,
-        {
-          id: Date.now(),
-          body: response.summary,
-          role: "assistant",
-          time: currentTime(),
-        },
-      ])
-    } catch (error) {
-      const body =
-        error instanceof ChatApiError && error.message ? error.message : "Something went wrong"
-      setMessages((current) => [
-        ...current,
-        {
-          id: Date.now(),
-          body,
-          role: "error",
-          time: currentTime(),
-        },
-      ])
-    }
-  }
-
+function ChatLayout({
+  activeModel,
+  setActiveModel,
+  messages,
+  message,
+  setMessage,
+  onSubmit,
+}: {
+  activeModel: ModelId
+  setActiveModel: (model: ModelId) => void
+  messages: Message[]
+  message: string
+  setMessage: (value: string) => void
+  onSubmit: (event: FormEvent) => void
+}) {
   return (
     <main className="min-h-screen bg-[#e8e4dc] p-0 text-[#17302e] md:p-5 lg:p-8">
       <section className="mx-auto flex h-screen max-w-[1120px] flex-col overflow-hidden bg-[#fbfaf7] shadow-[0_24px_70px_rgba(31,44,41,0.12)] md:h-[calc(100vh-2.5rem)] md:rounded-[28px] lg:h-[calc(100vh-4rem)]">
@@ -68,9 +39,50 @@ export default function App() {
           value={message}
           onChange={setMessage}
           activeModel={activeModel}
-          onSubmit={sendMessage}
+          onSubmit={onSubmit}
         />
       </section>
     </main>
+  )
+}
+
+export function App() {
+  const [activeModel, setActiveModel] = useState<ModelId>("local")
+  const [message, setMessage] = useState("")
+  const [messages, setMessages] = useState<Message[]>([])
+  const sendMessage = async (event: FormEvent) => {
+    event.preventDefault()
+    const body = message.trim()
+    if (!body) return
+
+    setMessages((current) => [
+      ...current,
+      { id: Date.now(), body, role: "user", time: currentTime() },
+    ])
+    setMessage("")
+
+    try {
+      const response = await sendChat({ prompt: body, provider: activeModel })
+      setMessages((current) => [
+        ...current,
+        { id: Date.now(), body: response.summary, role: "assistant", time: currentTime() },
+      ])
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        { id: Date.now(), body: errorMessage(error), role: "error", time: currentTime() },
+      ])
+    }
+  }
+
+  return (
+    <ChatLayout
+      activeModel={activeModel}
+      setActiveModel={setActiveModel}
+      messages={messages}
+      message={message}
+      setMessage={setMessage}
+      onSubmit={sendMessage}
+    />
   )
 }

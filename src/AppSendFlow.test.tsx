@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import App from "./App"
+import { App } from "./App"
 
 const okResponse = (body: unknown) =>
   ({
@@ -22,7 +22,7 @@ async function send(text: string) {
   fireEvent.keyDown(input, { key: "Enter", shiftKey: false })
 }
 
-describe("send flow", () => {
+describe("send flow requests", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn())
   })
@@ -51,6 +51,16 @@ describe("send flow", () => {
       provider: "local",
     })
   })
+})
+
+describe("send flow rendering", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
 
   it("appends the assistant bubble from summary with the role styling", async () => {
     vi.stubGlobal(
@@ -69,6 +79,16 @@ describe("send flow", () => {
     expect(bubble.className).toContain("bg-white")
     expect(bubble.className).toContain("rounded-tl-md")
   })
+})
+
+describe("send flow provider", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
 
   it("reflects the active model id in the provider field", async () => {
     const fetchMock = vi
@@ -84,6 +104,16 @@ describe("send flow", () => {
 
     const [, options] = fetchMock.mock.calls[0]
     expect(JSON.parse(options.body)).toEqual({ prompt: "Hello", provider: "remote" })
+  })
+})
+
+describe("send flow errors", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it.each([

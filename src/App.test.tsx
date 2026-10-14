@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import App from "./App"
+import { App } from "./App"
 
 const okResponse = (body: unknown) =>
   ({
@@ -9,7 +9,7 @@ const okResponse = (body: unknown) =>
     json: async () => body,
   }) as Response
 
-describe("App", () => {
+describe("App shell and model switcher", () => {
   it("renders the header per the mockup", () => {
     render(<App />)
 
@@ -42,7 +42,9 @@ describe("App", () => {
     expect(screen.queryByText("Choose model")).not.toBeInTheDocument()
     expect(screen.getByPlaceholderText("Ask Remote model anything…")).toBeInTheDocument()
   })
+})
 
+describe("App composer", () => {
   it("renders the composer per the mockup", () => {
     render(<App />)
 
@@ -64,7 +66,9 @@ describe("App", () => {
     fireEvent.change(screen.getByLabelText("Message"), { target: { value: "F-10001" } })
     expect(sendButton).toBeEnabled()
   })
+})
 
+describe("App send flow", () => {
   it("sends on Enter, appends an optimistic user bubble and scrolls to it", () => {
     vi.stubGlobal(
       "fetch",
