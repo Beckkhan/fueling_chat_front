@@ -1,4 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@600;700&display=swap");
+/* Self-hosted variable fonts (latin): the page must never fetch from a third-party origin. */
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("./fonts/dm-sans-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url("./fonts/manrope-latin.woff2") format("woff2");
+}
+
 @import "tailwindcss";
 
 @theme {

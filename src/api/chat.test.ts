@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import type { ChatRequest, ChatResponse } from "../types"
-import { ChatApiError, sendChat } from "./chat"
+import {
+  BackendUnavailableError,
+  BACKEND_UNAVAILABLE_MESSAGE,
+  ChatApiError,
+  sendChat,
+} from "./chat"
 
 const chatReply: ChatResponse = { summary: "Done", provider: "local", elapsed_ms: 7 }
 
@@ -84,5 +89,15 @@ describe("sendChat error mapping", () => {
     expect(error).toBeInstanceOf(ChatApiError)
     expect(error).not.toBeInstanceOf(SyntaxError)
     expect((error as Error).message).toBe(`request failed with status ${status}`)
+  })
+
+  it("maps a network-level fetch rejection to BackendUnavailableError, not ChatApiError", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")))
+
+    const error = await rejectionOf({ prompt: "Hello", provider: "local" })
+
+    expect(error).toBeInstanceOf(BackendUnavailableError)
+    expect(error).not.toBeInstanceOf(ChatApiError)
+    expect((error as Error).message).toBe(BACKEND_UNAVAILABLE_MESSAGE)
   })
 })

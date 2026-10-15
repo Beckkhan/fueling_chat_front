@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { BACKEND_UNAVAILABLE_MESSAGE } from "./api/chat"
 import { App } from "./App"
 
 const okResponse = (body: unknown) =>
@@ -149,5 +150,16 @@ describe("send flow errors", () => {
     expect(bubble.className).toContain("bg-[#f4f2ed]")
     expect(bubble.className).toContain("text-[#929996]")
     await waitFor(() => expect(screen.getByLabelText("Message")).toHaveValue(""))
+  })
+
+  it("renders the backend-unavailable message when fetch fails at the network level", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")))
+    render(<App />)
+
+    await send("Hello")
+
+    const bubble = await screen.findByText(BACKEND_UNAVAILABLE_MESSAGE)
+    expect(bubble.className).toContain("bg-[#f4f2ed]")
+    expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument()
   })
 })

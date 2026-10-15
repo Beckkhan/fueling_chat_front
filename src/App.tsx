@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
-import { ChatApiError, sendChat } from "./api/chat"
+import { BackendUnavailableError, ChatApiError, sendChat } from "./api/chat"
 import { Composer } from "./components/Composer"
 import { Header } from "./components/Header"
 import { MessageList } from "./components/MessageList"
@@ -13,8 +13,11 @@ const currentTime = () =>
     minute: "2-digit",
   })
 
-const errorMessage = (error: unknown) =>
-  error instanceof ChatApiError && error.message ? error.message : "Something went wrong"
+const errorMessage = (error: unknown) => {
+  if (error instanceof BackendUnavailableError) return error.message
+  if (error instanceof ChatApiError && error.message) return error.message
+  return "Something went wrong"
+}
 
 const responseMeta = (provider: string, elapsedMs: number) => {
   const name = provider === "local" ? models.local.name : provider === "remote" ? models.remote.name : provider
