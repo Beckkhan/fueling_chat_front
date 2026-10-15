@@ -22,6 +22,11 @@ async function send(text: string) {
   fireEvent.keyDown(input, { key: "Enter", shiftKey: false })
 }
 
+async function selectRemote() {
+  fireEvent.click(screen.getByRole("button", { name: /Local model/ }))
+  fireEvent.click(screen.getByRole("option", { name: /Remote model/ }))
+}
+
 describe("send flow requests", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn())
@@ -97,13 +102,27 @@ describe("send flow provider", () => {
     vi.stubGlobal("fetch", fetchMock)
     render(<App />)
 
-    fireEvent.click(screen.getByRole("button", { name: /Local model/ }))
-    fireEvent.click(screen.getByRole("option", { name: /Remote model/ }))
+    await selectRemote()
     await send("Hello")
     await screen.findByText("Done")
 
     const [, options] = fetchMock.mock.calls[0]
     expect(JSON.parse(options.body)).toEqual({ prompt: "Hello", provider: "remote" })
+  })
+  it("labels the assistant bubble with the provider the backend reports", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        okResponse({ summary: "Done", provider: "remote", elapsed_ms: 1400 }),
+      )
+    vi.stubGlobal("fetch", fetchMock)
+    render(<App />)
+
+    await selectRemote()
+    await send("Hello")
+    await screen.findByText("Done")
+
+    expect(screen.getByText(/Remote model · 1\.4 s/)).toBeInTheDocument()
   })
 })
 

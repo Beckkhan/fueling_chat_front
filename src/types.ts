@@ -6,6 +6,8 @@ export type Message = {
   body: string
   role: "assistant" | "user" | "error"
   time: string
+  /** Caption for assistant bubbles, e.g. "Remote model · 1.4 s" (the provider the backend reports). */
+  meta?: string
 }
 
 export type ChatRequest = {

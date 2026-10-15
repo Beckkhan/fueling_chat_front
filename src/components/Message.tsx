@@ -33,6 +33,7 @@ export function Message({ message }: { message: ChatMessage }) {
           className={`mt-1.5 px-1 text-[10px] text-[#929996] ${message.role === "user" ? "text-right" : ""}`}
         >
           {message.time}
+          {message.meta ? ` · ${message.meta}` : ""}
         </p>
       </div>
     </article>

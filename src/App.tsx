@@ -4,6 +4,7 @@ import { ChatApiError, sendChat } from "./api/chat"
 import { Composer } from "./components/Composer"
 import { Header } from "./components/Header"
 import { MessageList } from "./components/MessageList"
+import { models } from "./models"
 import type { Message, ModelId } from "./types"
 
 const currentTime = () =>
@@ -14,6 +15,20 @@ const currentTime = () =>
 
 const errorMessage = (error: unknown) =>
   error instanceof ChatApiError && error.message ? error.message : "Something went wrong"
+
+const responseMeta = (provider: string, elapsedMs: number) => {
+  const name = provider === "local" ? models.local.name : provider === "remote" ? models.remote.name : provider
+  const elapsed = elapsedMs >= 1000 ? `${(elapsedMs / 1000).toFixed(1)} s` : `${elapsedMs} ms`
+  return `${name} · ${elapsed}`
+}
+
+const assistantMessage = (summary: string, provider: string, elapsedMs: number): Message => ({
+  id: Date.now(),
+  body: summary,
+  role: "assistant",
+  time: currentTime(),
+  meta: responseMeta(provider, elapsedMs),
+})
 
 function ChatLayout({
   activeModel,
@@ -65,7 +80,7 @@ export function App() {
       const response = await sendChat({ prompt: body, provider: activeModel })
       setMessages((current) => [
         ...current,
-        { id: Date.now(), body: response.summary, role: "assistant", time: currentTime() },
+        assistantMessage(response.summary, response.provider, response.elapsed_ms),
       ])
     } catch (error) {
       setMessages((current) => [
